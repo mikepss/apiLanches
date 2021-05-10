@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LanchesAPI.Data;
+using LanchesAPI.Models;
 
 namespace LanchesAPI.Controllers
 {
@@ -22,11 +23,15 @@ namespace LanchesAPI.Controllers
 
         // GET: api/Lanches
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Lanche>>> GetLanches()
+        public async Task<Lanche[]> GetAllLanches()
         {
-            var resposta = await _context.Lanches.ToListAsync();
+            IQueryable<Lanche> query = _context.Lanches
+                 .Include(a => a.Adicionais)
+                 .ThenInclude(lanchei => lanchei.Ingrediente);
 
-            return resposta;
+            query = query.AsNoTracking().OrderBy(a => a.Id);
+
+            return await query.ToArrayAsync();
         }
 
         // GET: api/Lanches/5
@@ -48,7 +53,7 @@ namespace LanchesAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutLanche(int id, Lanche lanche)
         {
-            if (id != lanche.id)
+            if (id != lanche.Id)
             {
                 return BadRequest();
             }
@@ -82,7 +87,7 @@ namespace LanchesAPI.Controllers
             _context.Lanches.Add(lanche);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetLanche", new { id = lanche.id }, lanche);
+            return CreatedAtAction("GetLanche", new { id = lanche.Id }, lanche);
         }
 
         // DELETE: api/Lanches/5
@@ -103,7 +108,7 @@ namespace LanchesAPI.Controllers
 
         private bool LancheExists(int id)
         {
-            return _context.Lanches.Any(e => e.id == id);
+            return _context.Lanches.Any(e => e.Id == id);
         }
     }
 }

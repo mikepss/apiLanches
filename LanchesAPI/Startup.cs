@@ -35,6 +35,10 @@ namespace LanchesAPI
                     ServerVersion.AutoDetect(mySqlConnection)));
 
             services.AddControllers();
+
+            services.AddMvc(option => option.EnableEndpointRouting = false)
+                .AddNewtonsoftJson(opt => opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "LanchesAPI", Version = "v1" });
